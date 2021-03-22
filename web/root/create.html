@@ -17,7 +17,7 @@ const submitButton = document.querySelector("#submit-button");
 function createLink() {
 	try {
 		const value = resourceInput.value;
-		fetch("/create?resource="+btoa(value))
+		fetch("/sk-create?resource="+btoa(value))
 			.then(response => response.text()).then(text => {
 				const split = text.split(" ");
 				window.location.href = split[0] + "?key=" + split[1];
