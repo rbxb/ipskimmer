@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Create Link</title>
+</head>
+<body>
+	<form action="#" onsubmit="createLink();return false">
+		<input type="text" id="resource-input" name="resource" placeholder="Enter a URL" oninput="inputChange()" autocomplete="off">
+		<br>
+		<input type="radio" id="redirect" name="proxy" value="false" checked="true">
+		<label for="redirect">Redirect</label><br>
+		<input type="radio" id="proxy" name="proxy" value="true">
+		<label for="proxy">Proxy</label><br>
+		<br>
+		<input type="submit" id="submit-button" value="Submit">
+	</form>
+</body>
+<script>
+const resourceInput = document.querySelector("#resource-input");
+const proxyInput = document.querySelector("#proxy");
+const imageTypes = ["png", "jpg", "jpeg", "gif", "webp", "mp4", "svg"];
+
+function createLink() {
+	try {
+		const data = new FormData(document.querySelector('form'));
+		data.set("resource", btoa(data.get("resource")));
+		const query = [...data.entries()].map(x => `${encodeURIComponent(x[0])}=${encodeURIComponent(x[1])}`).join('&');
+		fetch("/create?"+query)
+			.then(response => response.text()).then(text => {
+				const split = text.split(" ");
+				window.location.href = split[0] + "?key=" + split[1];
+			});
+	} catch(err) {
+		console.error(err);
+	}
+}
+
+function inputChange() {
+	const value = resourceInput.value;
+	var u;
+	try {
+		u = new URL(value);
+	} catch(err) {
+		// prevent submit
+	}
+	const pathname = u.pathname;
+	const ext = pathname.substr(pathname.lastIndexOf('.') + 1);
+	if (imageTypes.includes(ext)) {
+		proxyInput.checked = true;
+	}
+}
+
+
+</script>
+</html>

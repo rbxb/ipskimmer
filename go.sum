@@ -1,0 +1,6 @@
+github.com/google/uuid v1.2.0 h1:qJYtXnJRWmpe7m/3XlyhrsLrEURqHRM2kxzoxXqyUDs=
+github.com/google/uuid v1.2.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+github.com/hashicorp/golang-lru v0.5.4 h1:YDjusn29QI/Das2iO9M0BHnIbxPeyuCHsjMW+lJfyTc=
+github.com/hashicorp/golang-lru v0.5.4/go.mod h1:iADmTwqILo4mZ8BN3D2Q6+9jd8WM5uGBxy+E8yxSoD4=
+github.com/rbxb/httpfilter v0.0.0-20201201140554-d0702af823a9 h1:70ePV2lOxDLwzjbdXHFqpHxa48kQxGJAXiZ6ntjLxiY=
+github.com/rbxb/httpfilter v0.0.0-20201201140554-d0702af823a9/go.mod h1:a5g1a+FRZnQ4MM49Cl0A8ripRqXbvh6iuOOcNXLXsIg=
