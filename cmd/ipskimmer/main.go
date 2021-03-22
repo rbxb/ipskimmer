@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
 
 	"github.com/rbxb/httpfilter"
 	"github.com/rbxb/ipskimmer"
@@ -40,14 +39,5 @@ func main() {
 	})
 	if err := http.ListenAndServe(port, fs); err != nil {
 		log.Fatal(err)
-	}
-}
-
-func ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	switch strings.Split(req.URL.Host, ".")[0] {
-	case "short":
-		sk.HandleAccessLink(w, req)
-	case "ipskimmer":
-		sk.HandleCreateLink(w, req)
 	}
 }

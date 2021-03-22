@@ -113,7 +113,7 @@ func (sv *Server) handleVisitLink(w http.ResponseWriter, req *http.Request, l *l
 	http.Redirect(w, req, l.resource, http.StatusMovedPermanently)
 
 	// add visitor to log
-	sv.stash.AddVisitor(l, getBaseAddr(req), time.Now().Unix())
+	sv.stash.AddVisitor(l.name, getBaseAddr(req), time.Now().Unix())
 }
 
 func getBaseAddr(req *http.Request) string {

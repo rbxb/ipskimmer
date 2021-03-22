@@ -8,12 +8,14 @@ import (
 	"strings"
 )
 
-func WriteToVisitorLog(path string, visitors []visitor) error {
-	buf := bytes.NewBuffer(nil)
-	for _, v := range visitors {
-		fmt.Fprint(buf, v.addr, " ", v.time, "\n")
+func WriteToVisitorLog(path string, addr string, time int64) error {
+	f, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		return err
 	}
-	return os.WriteFile(path, buf.Bytes(), 0666)
+	defer f.Close()
+	_, err = fmt.Fprint(f, addr, " ", time, "\n")
+	return err
 }
 
 func ReadLink(path string) (string, string, error) {

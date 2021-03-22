@@ -1,30 +1,26 @@
 package ipskimmer
 
 import (
+	"fmt"
 	"os"
 	"path"
-	"time"
 
 	lru "github.com/hashicorp/golang-lru"
 )
 
 const (
-	cacheSize     = 16
-	backlogSize   = 16
-	batchSize     = 64
-	flushInterval = 30 // seconds
+	cacheSize   = 16
+	backlogSize = 16
 )
 
 type link struct {
 	name     string
 	resource string
 	key      string
-	visitors []visitor
-	flushed  bool
 }
 
 type visitor struct {
-	l    *link
+	name string
 	addr string
 	time int64
 }
@@ -71,9 +67,11 @@ func (s *stash) Get(name string) (*link, error) {
 	}
 }
 
-func (s *stash) AddVisitor(l *link, addr string, time int64) {
+func (s *stash) AddVisitor(name, addr string, time int64) {
 	// add visitor to backlog to be saved
-	s.backlog <- visitor{l, addr, time}
+	fmt.Println("adding visitor")
+	s.backlog <- visitor{name, addr, time}
+	fmt.Println("added visitor")
 }
 
 func (s *stash) CreateLink(name, resource, key string, expires int64) error {
@@ -92,8 +90,6 @@ func (s *stash) loadLinkFromFile(name string) (*link, error) {
 		name:     name,
 		resource: resource,
 		key:      key,
-		visitors: make([]visitor, 0),
-		flushed:  true,
 	}
 	return l, nil
 }
@@ -107,34 +103,9 @@ func (s *stash) getVisitorsPath(name string) string {
 }
 
 func (s *stash) clearBacklog() {
-	nextFlush := time.Now().Unix() + flushInterval
-	batch := make([]*link, 0, batchSize)
-
 	for {
 		v := <-s.backlog
-		v.l.visitors = append(v.l.visitors, v)
-		v.l.flushed = false
-
-		// add to unflushed batch
-		batch = append(batch, v.l)
-
-		// flush batch if it's been a while
-		if len(batch) == cap(batch) || time.Now().Unix() < nextFlush {
-			for _, l := range batch {
-				// flushLink() will check if the link has
-				// already been flushed, so this is an effective
-				// batching system.
-				s.flushVisitors(l)
-			}
-			batch = batch[:0]
-			nextFlush = time.Now().Unix() + flushInterval
-		}
-	}
-}
-
-func (s *stash) flushVisitors(l *link) {
-	if !l.flushed {
-		l.flushed = true
-		WriteToVisitorLog(s.getVisitorsPath(l.name), l.visitors)
+		WriteToVisitorLog(s.getVisitorsPath(v.name), v.addr, v.time)
+		fmt.Println("wrote to file")
 	}
 }
