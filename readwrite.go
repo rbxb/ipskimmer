@@ -8,24 +8,20 @@ import (
 	"strings"
 )
 
-func ReadVisitorLog(path string) ([]byte, error) {
-	return os.ReadFile(path)
-}
-
 func WriteToVisitorLog(path string, visitors []visitor) error {
 	buf := bytes.NewBuffer(nil)
 	for _, v := range visitors {
-		fmt.Fprintf(buf, v.addr, " ", v.time)
+		fmt.Fprint(buf, v.addr, " ", v.time, "\n")
 	}
 	return os.WriteFile(path, buf.Bytes(), 0666)
 }
 
-func ReadLink(path string) (string, string, bool, error) {
+func ReadLink(path string) (string, string, error) {
 	split, err := readLinkSplit(path)
 	if err != nil {
-		return "", "", false, err
+		return "", "", err
 	}
-	return split[0], split[1], split[2] == "true", nil
+	return split[0], split[1], nil
 }
 
 func ReadLinkExpires(path string) (int64, error) {
@@ -48,8 +44,8 @@ func readLinkSplit(path string) ([]string, error) {
 	return strings.Split(string(b), " "), nil
 }
 
-func WriteLink(path string, resource string, key string, proxy bool, expires int64) error {
+func WriteLink(path string, resource string, key string, expires int64) error {
 	buf := bytes.NewBuffer(nil)
-	fmt.Fprint(buf, resource, " ", key, " ", proxy, " ", expires)
+	fmt.Fprint(buf, resource, " ", key, " ", expires)
 	return os.WriteFile(path, buf.Bytes(), 0666)
 }

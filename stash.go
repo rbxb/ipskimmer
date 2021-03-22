@@ -19,7 +19,6 @@ type link struct {
 	name     string
 	resource string
 	key      string
-	proxy    bool
 	visitors []visitor
 	flushed  bool
 }
@@ -77,15 +76,15 @@ func (s *stash) AddVisitor(l *link, addr string, time int64) {
 	s.backlog <- visitor{l, addr, time}
 }
 
-func (s *stash) CreateLink(name, resource, key string, proxy bool, expires int64) error {
-	if err := WriteLink(s.getLinkPath(name), resource, key, proxy, expires); err != nil {
+func (s *stash) CreateLink(name, resource, key string, expires int64) error {
+	if err := WriteLink(s.getLinkPath(name), resource, key, expires); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (s *stash) loadLinkFromFile(name string) (*link, error) {
-	resource, key, proxy, err := ReadLink(s.getLinkPath(name))
+	resource, key, err := ReadLink(s.getLinkPath(name))
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +92,6 @@ func (s *stash) loadLinkFromFile(name string) (*link, error) {
 		name:     name,
 		resource: resource,
 		key:      key,
-		proxy:    proxy,
 		visitors: make([]visitor, 0),
 		flushed:  true,
 	}

@@ -1,13 +1,11 @@
 package ipskimmer
 
 import (
+	"bytes"
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
-	"net/http/httputil"
-	"net/url"
 	"os"
 	"path"
 	"strings"
@@ -54,13 +52,11 @@ func (sv *Server) HandleCreateLink(w http.ResponseWriter, req *http.Request) {
 	}
 	resource = string(b)
 
-	proxy := query.Get("mode") == "proxy"
-
 	key := uuid.New().String()
 	name := makeIdentifier()
 
 	expires := time.Now().Add(time.Hour * linkLifetime).Unix()
-	if err := sv.stash.CreateLink(name, resource, key, proxy, expires); err != nil {
+	if err := sv.stash.CreateLink(name, resource, key, expires); err != nil {
 		http.Error(w, "Internal error.", 500)
 		log.Panic(err)
 		return
@@ -91,50 +87,40 @@ func (sv *Server) HandleAccessLink(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 	} else {
-		// respond with redirect/proxy
+		// respond with redirect
 		sv.handleVisitLink(w, req, l)
 	}
-
-	// add visitor to link
-	sv.stash.AddVisitor(l, getBaseAddr(req), time.Now().Unix())
 }
 
 func (sv *Server) handleViewLinkVisitors(w http.ResponseWriter, name string) {
-	b, err := ReadVisitorLog(sv.stash.getLinkPath(name))
+	buf := bytes.NewBuffer(nil)
+	buf.WriteString(name + " ")
+	b, err := os.ReadFile(sv.stash.getLinkPath(name))
 	if err != nil {
 		http.Error(w, "Internal error.", 500)
 		log.Panic(err)
 		return
 	}
-	w.Write(b)
+	buf.Write(b)
+	buf.WriteString("\n")
+	b, _ = os.ReadFile(sv.stash.getVisitorsPath(name))
+	buf.Write(b)
+	w.Write(buf.Bytes())
 }
 
 func (sv *Server) handleVisitLink(w http.ResponseWriter, req *http.Request, l *link) {
 	// write the response
-	if l.proxy {
-		proxy(w, req, l.resource)
-	} else {
-		http.Redirect(w, req, l.resource, http.StatusMovedPermanently)
-		return
-	}
-}
+	http.Redirect(w, req, l.resource, http.StatusMovedPermanently)
 
-func proxy(w http.ResponseWriter, req *http.Request, addr string) {
-	u, err := url.Parse(addr)
-	if err != nil {
-		log.Panic(errors.New("couldn't parse URL"))
-		http.Error(w, "Internal error.", 500)
-		return
-	}
-	proxy := httputil.NewSingleHostReverseProxy(u)
-	proxy.ErrorHandler = func(w http.ResponseWriter, req *http.Request, err error) {
-		http.Error(w, "Internal error.", 500)
-	}
-	proxy.ServeHTTP(w, req)
+	// add visitor to log
+	sv.stash.AddVisitor(l, getBaseAddr(req), time.Now().Unix())
 }
 
 func getBaseAddr(req *http.Request) string {
 	s := req.Header.Get("X-Forwarded-For")
+	if s == "" {
+		return req.RemoteAddr
+	}
 	ips := strings.Split(s, ",")
 	return ips[0]
 }
