@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/rbxb/httpfilter"
 	"github.com/rbxb/ipskimmer"
@@ -13,6 +14,7 @@ import (
 var port string
 var root string
 var logPath string
+var sk *ipskimmer.Server
 
 func init() {
 	flag.StringVar(&port, "port", ":8080", "The address and port the fileserver listens at.")
@@ -30,7 +32,7 @@ func main() {
 		defer f.Close()
 		log.SetOutput(f)
 	}
-	sk := ipskimmer.NewServer(root)
+	sk = ipskimmer.NewServer(root)
 	fs := httpfilter.NewServer(root, "", map[string]httpfilter.OpFunc{
 		"sk": func(w http.ResponseWriter, req *http.Request, args ...string) {
 			sk.ServeHTTP(w, req)
@@ -38,5 +40,14 @@ func main() {
 	})
 	if err := http.ListenAndServe(port, fs); err != nil {
 		log.Fatal(err)
+	}
+}
+
+func ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	switch strings.Split(req.URL.Host, ".")[0] {
+	case "short":
+		sk.HandleAccessLink(w, req)
+	case "ipskimmer":
+		sk.HandleCreateLink(w, req)
 	}
 }
