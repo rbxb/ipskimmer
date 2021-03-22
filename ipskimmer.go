@@ -30,7 +30,7 @@ func NewServer(root string) *Server {
 
 func (sv *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	switch path.Clean(req.URL.Path) {
-	case "/create":
+	case "/sk-create":
 		sv.HandleCreateLink(w, req)
 	default:
 		sv.HandleAccessLink(w, req)
