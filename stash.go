@@ -1,7 +1,6 @@
 package ipskimmer
 
 import (
-	"fmt"
 	"os"
 	"path"
 
@@ -69,9 +68,7 @@ func (s *stash) Get(name string) (*link, error) {
 
 func (s *stash) AddVisitor(name, addr string, time int64) {
 	// add visitor to backlog to be saved
-	fmt.Println("adding visitor")
 	s.backlog <- visitor{name, addr, time}
-	fmt.Println("added visitor")
 }
 
 func (s *stash) CreateLink(name, resource, key string, expires int64) error {
@@ -106,6 +103,5 @@ func (s *stash) clearBacklog() {
 	for {
 		v := <-s.backlog
 		WriteToVisitorLog(s.getVisitorsPath(v.name), v.addr, v.time)
-		fmt.Println("wrote to file")
 	}
 }
