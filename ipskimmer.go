@@ -45,7 +45,7 @@ func (sv *Server) HandleCreateLink(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "Bad request.", 400)
 		return
 	}
-	b, err := base64.URLEncoding.DecodeString(resource)
+	b, err := base64.StdEncoding.DecodeString(resource)
 	if err != nil {
 		http.Error(w, "Bad request.", 400)
 		return
@@ -94,7 +94,6 @@ func (sv *Server) HandleAccessLink(w http.ResponseWriter, req *http.Request) {
 
 func (sv *Server) handleViewLinkVisitors(w http.ResponseWriter, name string) {
 	buf := bytes.NewBuffer(nil)
-	buf.WriteString(name + " ")
 	b, err := os.ReadFile(sv.stash.getLinkPath(name))
 	if err != nil {
 		http.Error(w, "Internal error.", 500)
