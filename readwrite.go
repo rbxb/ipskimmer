@@ -31,7 +31,7 @@ func ReadLinkExpires(path string) (int64, error) {
 	if err != nil {
 		return -1, err
 	}
-	n, err := strconv.ParseInt(split[3], 10, 64)
+	n, err := strconv.ParseInt(split[2], 10, 64)
 	if err != nil {
 		return -1, err
 	}
