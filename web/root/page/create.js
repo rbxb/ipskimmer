@@ -1,16 +1,3 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<title>Create Link</title>
-</head>
-<body>
-	<form action="#" onsubmit="createLink();return false">
-		<input type="text" id="resource-input" name="resource" placeholder="Enter a URL" oninput="inputChange()" autocomplete="off">
-		<br>
-		<input type="submit" id="submit-button" value="Submit" disabled="true">
-	</form>
-</body>
-<script>
 const resourceInput = document.querySelector("#resource-input");
 const submitButton = document.querySelector("#submit-button");
 
@@ -18,9 +5,14 @@ function createLink() {
 	try {
 		const value = resourceInput.value;
 		fetch("/sk-create?resource="+btoa(value))
-			.then(response => response.text()).then(text => {
+			.then(response => {
+				if (response.status != 200) {
+					return;
+				}
+				return response.text();
+			}).then(text => {
 				const split = text.split(" ");
-				window.location.href = split[0] + "?key=" + split[1];
+				window.location.href = "/page/view?resource=" + split[0] + "&key=" + split[1];
 			});
 	} catch(err) {
 		console.error(err);
@@ -50,7 +42,3 @@ function preventSubmit() {
 function allowSubmit() {
 	submitButton.disabled = false;
 }
-
-
-</script>
-</html>
