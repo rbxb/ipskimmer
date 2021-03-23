@@ -16,7 +16,7 @@ var root string
 var now = time.Now().Unix()
 
 func init() {
-	flag.StringVar(&root, "root", "./", "The working directory.")
+	flag.StringVar(&root, "root", "./root", "The working directory.")
 }
 
 func main() {
